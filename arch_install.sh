@@ -23,7 +23,7 @@ CPU_PACKAGES="${CPU_VENDOR}-ucode" # Microcode - Change it accordingly
 LATEST_TORBROWSER_VERSION=$(curl -s 'https://www.torproject.org/download/' | grep -m1 -oP '(?<=/dist/torbrowser/).*?(?=/tor-browser-linux64)')
 TORBROWSER_DEPENDS="mozilla-common libxt startup-notification mime-types dbus-glib alsa-lib desktop-file-utils hicolor-icon-theme libvpx icu libevent nss hunspell sqlite"
 KERNEL="linux-hardened"
-PACSTRAP_PACKAGES="base base-devel vim ${KERNEL} ${KERNEL}-headers linux-firmware lvm2 ${CPU_PACKAGES} ${GPU_PACKAGES} iwd zip openssh docker-compose xorg-server xorg-xinit xorg-xrandr xorg-xsetroot feh picom apparmor neofetch git man unzip code flameshot unrar ttf-opensans terminus-font ttf-font-awesome gptfdisk dmenu pulseaudio pavucontrol alsa-utils telegram-desktop bubblewrap-suid irssi tor neomutt ${TORBROWSER_DEPENDS}"
+PACSTRAP_PACKAGES="base base-devel vim ${KERNEL} ${KERNEL}-headers linux-firmware lvm2 ${CPU_PACKAGES} ${GPU_PACKAGES} iwd zip openssh docker-compose xorg-server xorg-xinit xorg-xrandr xorg-xsetroot feh picom apparmor neofetch git man unzip code flameshot unrar ttf-opensans terminus-font ttf-font-awesome gptfdisk dmenu pulseaudio pavucontrol alsa-utils telegram-desktop bubblewrap-suid irssi tor neomutt virtualbox openbsd-netcat ttf-liberation sqlmap nano firejail ${TORBROWSER_DEPENDS}"
 ADDITIONAL_INITRD="initrd /${CPU_VENDOR}-ucode.img"
 DISK_BY_ID="$(ls /dev/disk/by-id/nvme-Force_MP510*)" # You will surely need to change this one.
 LVM_VG_LABEL="vg0"
