@@ -15,7 +15,7 @@ LUKS_HEADER_FILENAME="header.img"
 MKINITCPIO_FILES="/boot/${LUKS_HEADER_FILENAME}"
 MKINITCPIO_MODULES="ext4"
 MKINITCPIO_HOOKS="base systemd autodetect keyboard sd-vconsole modconf block sd-encrypt sd-lvm2 filesystems fsck"
-HTTPS_NEARBY_MIRRORLIST="https://www.archlinux.org/mirrorlist/?country=BR&country=CL&protocol=https"
+HTTPS_NEARBY_MIRRORLIST="https://archlinux.org/mirrorlist/?country=BR&country=CL&protocol=https"
 XORG_NEEDS_ROOT_RIGHTS="no"
 CPU_VENDOR="intel" # Change it accordingly
 GPU_PACKAGES="nvidia-dkms"  # GPU driver - Change it accordingly
@@ -27,6 +27,7 @@ PACSTRAP_PACKAGES="base base-devel vim ${KERNEL} ${KERNEL}-headers linux-firmwar
 ADDITIONAL_INITRD="initrd /${CPU_VENDOR}-ucode.img"
 DISK_BY_ID="$(ls /dev/disk/by-id/nvme-Force_MP510*)" # You will surely need to change this one.
 LVM_VG_LABEL="vg0"
+LUKS_CONTAINER_LABEL="tudo"
 BASE_KERNEL_BOOT_PARAMS="options cryptdevice=${DISK_BY_ID}:${LVM_VG_LABEL} root=/dev/mapper/${LVM_VG_LABEL}-root"
 KERNEL_BOOT_PARAMS="${BASE_KERNEL_BOOT_PARAMS} rw apparmor=1 security=apparmor lsm=lockdown,yama,apparmor slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 slub_debug=F mce=0 oops=panic iommu=force ${CPU_VENDOR}_iommu=on pti=on spectre_v2=on mds=full,nosmt extra_latent_entropy"
 KERNEL_SYSCTL_PARAMS=('kernel.yama.ptrace_scope = 3' 'dev.tty.ldisc_autoload = 0' 'fs.protected_fifos = 2' 'fs.protected_regular = 2' 'kernel.sysrq = 0' 'net.ipv4.tcp_sack = 0')
@@ -65,6 +66,7 @@ WIFI_PASSWORD="..." # You will surely need to change this one.
 SSID_HIDDEN="Hidden=true" # No? So empty it or change to false.
 
 # Script
+set -e # Kills the entire script when some command fails.
 
 # Prepare the USB drive that will be our /boot and LUKS header's place.
 sgdisk --clear --zap-all ${DETACHED_HEADER_AND_BOOT_BLK} # Wipe all the partitions and the partition table itself.
@@ -72,19 +74,19 @@ sgdisk -o ${DETACHED_HEADER_AND_BOOT_BLK}                # Create a GPT partitio
 sgdisk -n 1:0:+${DETACHED_BOOT_PARTITION_SIZE} ${DETACHED_HEADER_AND_BOOT_BLK}        # Create the first and only 2GB partition
 sgdisk -t 1:ef00 ${DETACHED_HEADER_AND_BOOT_BLK}         # Set the EF00 type to the partition
 mkfs.fat -F32 ${DETACHED_HEADER_AND_BOOT_PART}           # FAT32 format the partition
-mount ${DETACHED_HEADER_AND_BOOT_PART} /mnt         # Mount the partition into our new directory since /mnt isn't there yet.
+mount ${DETACHED_HEADER_AND_BOOT_PART} /mnt
 
 # Prepare the target drive
 sgdisk --clear --zap-all ${TARGET_DISK_BLK} 
 echo -e "\n\n[+] Set and confirm the LUKS password!"
 cryptsetup ${LUKS_FORMAT_ARGS} luksFormat ${TARGET_DISK_BLK}
 echo -e "\n\n[+] Enter the LUKS password below, we'll open the disk now!"
-cryptsetup --header /mnt/${LUKS_HEADER_FILENAME} open ${TARGET_DISK_BLK} tudo
+cryptsetup --header /mnt/${LUKS_HEADER_FILENAME} open ${TARGET_DISK_BLK} ${LUKS_CONTAINER_LABEL}
 umount /mnt
 
 # Create the volume group
-pvcreate -q /dev/mapper/tudo
-vgcreate -q ${LVM_VG_LABEL} /dev/mapper/tudo
+pvcreate -q /dev/mapper/${LUKS_CONTAINER_LABEL}
+vgcreate -q ${LVM_VG_LABEL} /dev/mapper/${LUKS_CONTAINER_LABEL}
 
 # Create the volumes
 for key in "${!LVM_VOLUMES[@]}"; do
@@ -128,12 +130,13 @@ systemctl start iptables
 
 for chain in INPUT FORWARD OUTPUT; do
     iptables -P ${chain} DROP
-    # Ugly way to allow loopback below, I know. Heh. But it is the most suitable way for a loop like here.
-    iptables -A ${chain} -s 127.0.0.1 -d 127.0.0.1 -j ACCEPT
 done
 
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED,NEW -j ACCEPT
+
+iptables -A INPUT  -i lo -s 127.0.0.1 -j ACCEPT
+iptables -A OUTPUT -o lo -d 127.0.0.1 -j ACCEPT
 
 # Mirrorlist
 curl -s --retry 4 "${HTTPS_NEARBY_MIRRORLIST}" > /etc/pacman.d/mirrorlist
@@ -239,9 +242,14 @@ arch-chroot /mnt systemctl enable apparmor iptables iwd
 # initcpio creation
 arch-chroot /mnt mkinitcpio -p ${KERNEL}
 
-# Paranoid
+## Parse and enforce firejail's AppArmor profile.
+arch-chroot /mnt apparmor_parser -r /etc/apparmor.d/firejail-default
+arch-chroot /mnt aa-enforce firejail-default
+
+# Let's save the sha256sum of the files from /boot 
+# and save/copy this installation script from here to somewhere in the installed system)
 sh -c "arch-chroot /mnt find /boot -type f -exec sha256sum {} \;" > /mnt/home/hashes.txt
-cp -r ~/archs/ /mnt/home/
+cp -r ~/arch_install_sh/ /mnt/home/
 
 # Let's generate our fstab (excluding the boot partition)
 umount /mnt/boot
@@ -251,4 +259,6 @@ genfstab -U -P /mnt >> /mnt/etc/fstab
 echo -e "\n\n[+] Bye!"
 swapoff --all
 umount -R /mnt
+vgchange -an ${LVM_VG_LABEL}
+cryptsetup close ${LUKS_CONTAINER_LABEL}
 # reboot
