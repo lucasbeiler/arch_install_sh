@@ -56,9 +56,9 @@ MOUNT_ARGS[opt]="-o rw,relatime,nosuid,nodev"
 MOUNT_ARGS[home]="-o rw,relatime,nosuid,nodev,noexec"
 MOUNT_ARGS[boot]="-o noauto"
 
-declare -A MOUNT_ARGS_FOR_PSEUDOFS
-MOUNT_ARGS_FOR_PSEUDOFS[proc]="-o nosuid,nodev,noexec,hidepid=2 -t proc proc"
-MOUNT_ARGS_FOR_PSEUDOFS[tmp]="-o rw,relatime,nodev,nosuid,noexec,size=4G -t tmpfs tmpfs"
+declare -A MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS
+MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[proc]="-o nosuid,nodev,noexec,hidepid=2,gid=proc -t proc proc"
+MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[tmp]="-o rw,relatime,nodev,nosuid,noexec,size=4G -t tmpfs tmpfs"
 
 # Wi-Fi
 WIFI_SSID="..." # You will surely need to change this one.
@@ -116,10 +116,10 @@ for key in "${!MOUNT_ARGS[@]}"; do
     fi
 done
 
-# Mount pseudofs
-for key in "${!MOUNT_ARGS_FOR_PSEUDOFS[@]}"; do
+# Mount pseudo filesystems
+for key in "${!MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[@]}"; do
     mkdir /mnt/${key}
-    mount ${MOUNT_ARGS_FOR_PSEUDOFS[$key]} /mnt/${key}
+    mount ${MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[$key]} /mnt/${key}
 done
 
 # Stateful Firewall
