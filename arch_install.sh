@@ -138,6 +138,13 @@ iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED,NEW -j ACCEPT
 iptables -A INPUT  -i lo -s 127.0.0.1 -j ACCEPT
 iptables -A OUTPUT -o lo -d 127.0.0.1 -j ACCEPT
 
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+# iptables -A INPUT -p udp -m conntrack --ctstate NEW -j UDP
+# iptables -A INPUT -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j TCP
+iptables -A INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
+iptables -A INPUT -p tcp -j REJECT --reject-with tcp-reset
+iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+
 # Mirrorlist
 curl -s --retry 4 "${HTTPS_NEARBY_MIRRORLIST}" > /etc/pacman.d/mirrorlist
 sed -i 's/#Server/Server/' /etc/pacman.d/mirrorlist
