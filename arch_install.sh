@@ -29,7 +29,7 @@ DISK_BY_ID="$(ls /dev/disk/by-id/nvme-Force_MP510*)" # You will surely need to c
 LVM_VG_LABEL="vg0"
 LUKS_CONTAINER_LABEL="tudo"
 BASE_KERNEL_BOOT_PARAMS="options cryptdevice=${DISK_BY_ID}:${LVM_VG_LABEL} root=/dev/mapper/${LVM_VG_LABEL}-root"
-KERNEL_BOOT_PARAMS="${BASE_KERNEL_BOOT_PARAMS} rw apparmor=1 security=apparmor lsm=lockdown,yama,apparmor slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 slub_debug=F mce=0 oops=panic iommu=force ${CPU_VENDOR}_iommu=on pti=on spectre_v2=on mds=full,nosmt extra_latent_entropy"
+KERNEL_BOOT_PARAMS="${BASE_KERNEL_BOOT_PARAMS} rw apparmor=1 security=apparmor lsm=lockdown,yama,apparmor slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 slub_debug=F mce=0 oops=panic iommu=force ${CPU_VENDOR}_iommu=on pti=on spectre_v2=on mds=full,nosmt efi=disable_early_pci_dma spec_store_bypass_disable=on tsx=off tsx_async_abort=full,nosmt l1tf=full,force nosmt=force kvm.nx_huge_pages=force extra_latent_entropy"
 KERNEL_SYSCTL_PARAMS=('kernel.yama.ptrace_scope = 3' 'dev.tty.ldisc_autoload = 0' 'fs.protected_fifos = 2' 'fs.protected_regular = 2' 'kernel.sysrq = 0' 'net.ipv4.tcp_sack = 0')
 MODPROBE_BLACKLIST=('bluetooth' 'btusb' 'uvcvideo')
 DNSSERVERS=('1.1.1.1' '1.0.0.1') # Primary and secondary
