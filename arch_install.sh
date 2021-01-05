@@ -229,6 +229,10 @@ do
     echo "$item" >> /mnt/etc/sysctl.d/params.conf
 done
 
+# Specifies where we are allowed to login as root from. Let's allow only tty2 and tty3.
+echo 'tty2' | tee /etc/securetty
+echo 'tty3' | tee -a /etc/securetty
+
 # Set initcpio-related things and crypttab
 touch /mnt/etc/vconsole.conf
 sed -i "s/^HOOKS=(.*/HOOKS=(${MKINITCPIO_HOOKS})/" /mnt/etc/mkinitcpio.conf
