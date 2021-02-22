@@ -20,10 +20,9 @@ XORG_NEEDS_ROOT_RIGHTS="no"
 CPU_VENDOR="intel" # Change it accordingly
 GPU_PACKAGES="nvidia-dkms"  # GPU driver - Change it accordingly
 CPU_PACKAGES="${CPU_VENDOR}-ucode" # Microcode - Change it accordingly
-LATEST_TORBROWSER_VERSION=$(curl -s 'https://www.torproject.org/download/' | grep -m1 -oP '(?<=/dist/torbrowser/).*?(?=/tor-browser-linux64)')
-TORBROWSER_DEPENDS="mozilla-common libxt startup-notification mime-types dbus-glib alsa-lib desktop-file-utils hicolor-icon-theme libvpx icu libevent nss hunspell sqlite"
+TBB_DEPENDS="mozilla-common libxt startup-notification mime-types dbus-glib alsa-lib desktop-file-utils hicolor-icon-theme libvpx icu libevent nss hunspell sqlite"
 KERNEL="linux-hardened"
-PACSTRAP_PACKAGES="base base-devel vim ${KERNEL} ${KERNEL}-headers linux-firmware lvm2 ${CPU_PACKAGES} ${GPU_PACKAGES} iwd zip openssh docker-compose xorg-server xorg-xinit xorg-xrandr xorg-xsetroot feh picom apparmor neofetch git man unzip code flameshot unrar ttf-opensans terminus-font ttf-font-awesome gptfdisk dmenu pipewire-pulse pavucontrol alsa-utils telegram-desktop bubblewrap-suid irssi tor neomutt virtualbox openbsd-netcat ttf-liberation sqlmap nano ${TORBROWSER_DEPENDS}"
+PACSTRAP_PACKAGES="base base-devel vim ${KERNEL} ${KERNEL}-headers linux-firmware lvm2 ${CPU_PACKAGES} ${GPU_PACKAGES} iwd zip openssh docker-compose xorg-server xorg-xinit xorg-xrandr xorg-xsetroot feh picom apparmor neofetch git man unzip code flameshot unrar ttf-opensans terminus-font ttf-font-awesome gptfdisk dmenu pipewire-pulse pavucontrol alsa-utils telegram-desktop bubblewrap-suid weechat tor virtualbox openbsd-netcat ttf-liberation sqlmap nano chromium firefox ${TBB_DEPENDS}"
 ADDITIONAL_INITRD="initrd /${CPU_VENDOR}-ucode.img"
 DISK_BY_ID="$(ls /dev/disk/by-id/nvme-Force_MP510*)" # You will surely need to change this one.
 LVM_VG_LABEL="vg0"
@@ -253,9 +252,9 @@ arch-chroot /mnt systemctl enable apparmor iptables iwd
 # initcpio creation
 arch-chroot /mnt mkinitcpio -p ${KERNEL}
 
-# Let's save the sha256sum of the files from /boot 
+# Let's save the sha512sum of the files from /boot 
 # and save/copy this installation script from here to somewhere in the installed system)
-sh -c "arch-chroot /mnt find /boot -type f -exec sha256sum {} \;" > /mnt/home/hashes.txt
+sh -c "arch-chroot /mnt find /boot -type f -exec sha512sum {} \;" > /mnt/home/hashes.txt
 cp -r ~/arch_install_sh/ /mnt/home/
 
 # Let's generate our fstab (excluding the boot partition)
