@@ -65,7 +65,7 @@ WIFI_SSID="example" # Change it accordingly.
 WIFI_PASSWORD="whatever" # Change it accordingly.
 SSID_HIDDEN="" # Is it? So set to "Hidden=true".
 
-# Scripts starts here.
+# Script starts here.
 set -e # If any command fails, this directive will kill the entire script.
 
 # Prepare the USB drive where the /boot partition and the LUKS header will be stored (outside of the primary disk, detached of it).
@@ -167,6 +167,9 @@ sed -i 's/^SigLevel.*/SigLevel = Required DatabaseOptional TrustedOnly/' /mnt/et
 sed -i 's/^LocalFileSigLevel.*/LocalFileSigLevel = Required DatabaseOptional TrustedOnly/' /mnt/etc/pacman.conf 
 
 # Further Wi-Fi and general network setup.
+if [[ $WIFI_SSID == *['!'@#\$%^\&*()_+-';']* ]]; then
+    WIFI_SSID="=$(printf "${WIFI_SSID}" | xxd -pu)"
+fi
 iptables-save | tee /mnt/etc/iptables/ip{tables.rules,6tables.rules}
 mkdir /mnt/{etc,var/lib}/iwd
 echo -en "[General]\nEnableNetworkConfiguration=true" > /mnt/etc/iwd/main.conf
