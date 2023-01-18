@@ -14,20 +14,22 @@ LOCALES=("pt_BR.UTF-8 UTF-8" "pt_BR ISO-8859-1")
 TIMEZONE="America/Sao_Paulo"
 CPU_VENDOR=$(cat /proc/cpuinfo | grep 'vendor' | uniq | tr '[:upper:]' '[:lower:]' | awk 'NF>1{print $NF}' | sed 's/\genuine\|authentic//g')
 KERNEL="linux-hardened"
-PACSTRAP_PACKAGES="base base-devel neovim ${KERNEL} ${KERNEL}-headers ${CPU_VENDOR}-ucode jq man-db btrfs-progs dracut binutils elfutils tpm2-tools sbctl linux-firmware wireguard-tools iwd zip dnscrypt-proxy openssh alacritty uutils-coreutils exa apparmor neofetch git unzip unrar ttf-opensans gptfdisk pipewire-pulse pavucontrol alsa-utils bubblewrap-suid irssi arti openbsd-netcat sqlmap nmap code chromium ttf-fantasque-sans-mono net-tools pamixer patchutils nodejs npm nano opendoas ttf-ubuntu-font-family capitaine-cursors sbsigntools efitools ansible vagrant docker docker-compose terraform minikube zathura kanshi vulkan-headers vulkan-tools vulkan-validation-layers seatd go kubectl pipewire-jack wireplumber checksec grim slurp wl-clipboard telegram-desktop qemu-base dnsmasq libvirt bridge-utils brightnessctl usbctl usbguard gxmessage torbrowser-launcher"
-IGNORED_PKGS="sudo" # Sudo is ignored since I use doas, which is safer and smaller.
-KERNEL_BOOT_PARAMS="apparmor=1 security=apparmor lsm=lockdown,yama,apparmor slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 mce=0 oops=panic ${CPU_VENDOR}_iommu=on iommu=force iommu.strict=1 iommu.passthrough=0 vsyscall=none pti=on spectre_v2=on mds=full,nosmt efi=disable_early_pci_dma spec_store_bypass_disable=on tsx=off tsx_async_abort=full,nosmt l1tf=full,force nosmt=force kvm.nx_huge_pages=force randomize_kstack_offset=on debugfs=off ipv6.disable=1 libata.force=3.00:disable,3.00:norst extra_latent_entropy"
+PACSTRAP_PACKAGES="base base-devel neovim ${KERNEL} ${KERNEL}-headers ${CPU_VENDOR}-ucode jq man-db btrfs-progs dracut binutils elfutils tpm2-tools sbctl linux-firmware wireguard-tools iwd zip dnscrypt-proxy openssh alacritty uutils-coreutils exa apparmor neofetch git unzip unrar ttf-opensans gptfdisk pipewire-pulse pavucontrol bubblewrap-suid irssi arti openbsd-netcat sqlmap nmap code chromium ttf-fantasque-sans-mono net-tools pamixer patchutils nodejs npm nano opendoas ttf-ubuntu-font-family capitaine-cursors sbsigntools ansible vagrant docker docker-compose terraform minikube zathura kanshi vulkan-headers vulkan-tools go kubectl pipewire-jack wireplumber checksec telegram-desktop qemu-base dnsmasq libvirt bridge-utils brightnessctl arch-repro-status plasma-wayland-session plasma-desktop plasma-pa kscreen kpipewire systemsettings"
+IGNORED_PKGS="sudo" # Sudo is ignored since I use doas, which is safer and smaller. I also ignore some unreproducible and useless (for me) dependencies.
+KERNEL_BOOT_PARAMS="apparmor=1 security=apparmor lsm=lockdown,yama,apparmor quiet slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 mce=0 oops=panic ${CPU_VENDOR}_iommu=on iommu=force iommu.strict=1 iommu.passthrough=0 vsyscall=none pti=on spectre_v2=on mds=full,nosmt efi=disable_early_pci_dma spec_store_bypass_disable=on tsx=off tsx_async_abort=full,nosmt l1tf=full,force nosmt=force kvm.nx_huge_pages=force randomize_kstack_offset=on debugfs=off ipv6.disable=1 libata.force=3.00:disable,3.00:norst extra_latent_entropy"
 KERNEL_SYSCTL_PARAMS=('kernel.yama.ptrace_scope = 3' 'dev.tty.ldisc_autoload = 0' 'fs.protected_fifos = 2' 'fs.protected_regular = 2' 'kernel.sysrq = 0' 'net.ipv4.tcp_sack = 0' 'net.ipv4.tcp_dsack=0' 'net.ipv4.tcp_fack=0' 'fs.suid_dumpable=0' 'net.ipv4.tcp_rfc1337=1' 'kernel.kexec_load_disabled=1' 'user.max_user_namespaces=0' 'vm.unprivileged_userfaultfd=0' 'net.ipv4.conf.all.rp_filter=1' 'net.ipv4.conf.default.rp_filter=1' 'net.ipv4.conf.all.accept_redirects=0' 'net.ipv4.conf.default.accept_redirects=0' 'net.ipv4.conf.all.secure_redirects=0' 'net.ipv4.conf.default.secure_redirects=0' 'net.ipv6.conf.all.accept_redirects=0' 'net.ipv6.conf.default.accept_redirects=0' 'net.ipv4.conf.all.send_redirects=0' 'net.ipv4.conf.default.send_redirects=0' 'net.ipv4.icmp_echo_ignore_all=1' 'net.ipv4.conf.all.accept_source_route=0' 'net.ipv4.conf.default.accept_source_route=0' 'net.ipv6.conf.all.accept_source_route=0' 'net.ipv6.conf.default.accept_source_route=0' 'net.ipv6.conf.all.accept_ra=0' 'net.ipv6.conf.default.accept_ra=0')
 MODPROBE_BLACKLIST=('bluetooth' 'btusb' 'dccp' 'sctp' 'rds' 'tipc' 'n-hdlc' 'ax25' 'netrom' 'x25' 'rose' 'decnet' 'econet' 'af_802154' 'ipx' 'appletalk' 'psnap' 'p8023' 'p8022' 'can' 'atm' 'cramfs' 'freevxfs' 'jffs2' 'hfs' 'hfsplus' 'squashfs' 'udf' 'cifs' 'nfs' 'nfsv3' 'nfsv4' 'gfs2' 'vivid' 'mei' 'mei-me' 'mei_me' 'mei_hdcp' 'mei_pxp'  'ath_pci' 'thunderbolt' 'firewire-core' 'firewire_core' 'firewire-ohci' 'firewire_ohci' 'firewire_sbp2' 'firewire-sbp2' 'ohci1394' 'sbp2' 'dv1394' 'raw1394' 'video1394' 'msr' 'evbug' 'eepro100' 'cdrom' 'sr_mod')
 
 # TODO: Improve and expand GPU/CPU/disk detection and specific actions. Currently, all these detections are very basic.
-if lspci | grep -i "3d\|vga" | grep -qi "nvidia\|geforce"; then
-    KERNEL_BOOT_PARAMS+=" nvidia-drm.modeset=1 "
-    PACSTRAP_PACKAGES+=" nvidia-dkms "
-elif lspci | grep -i vga | grep -qi "HD Graphics"; then
-    PACSTRAP_PACKAGES+=" intel-media-driver vulkan-intel "
-    KERNEL_BOOT_PARAMS+=" lockdown=confidentiality module.sig_enforce=1 " # Since Intel cards doesn't rely on DKMS modules, we can set lockdown=confidentiality and module.sig_enforce=1.
-fi
+# if lspci | grep -i "3d\|vga" | grep -qi "nvidia\|geforce"; then
+#     KERNEL_BOOT_PARAMS+=" nvidia-drm.modeset=1 "
+#     PACSTRAP_PACKAGES+=" nvidia-dkms "
+# elif lspci | grep -i vga | grep -qi "HD Graphics"; then
+
+# Always consider Intel GPU usage since I do not want to use the proprietary and out-of-tree NVIDIA drivers anymore.
+PACSTRAP_PACKAGES+=" intel-media-driver libva-intel-driver libvdpau-va-gl libva-utils vulkan-intel "
+KERNEL_BOOT_PARAMS+=" lockdown=confidentiality module.sig_enforce=1 " # Since Intel cards doesn't rely on DKMS modules, we can set lockdown=confidentiality and module.sig_enforce=1, hardening the kernel further.
+# fi
 
 # It will automatically detect the biggest SSD avaible.
 TARGET_DISK_BLK="/dev/$(lsblk -x SIZE -d -o name,rota,type --json | jq -r '.blockdevices[] | select(( .rota == false) and .type == "disk").name' | tac | head -n1)"
@@ -44,7 +46,14 @@ LUKS_FORMAT_ARGS="-v --hash sha512 --use-urandom"
 LUKS_CONTAINER_LABEL="tudo"
 ROOT_PART_NAME="linux"
 BOOT_PART_NAME="EFISYSTEM"
-SUBVOLS=('var' 'home')
+
+declare -A MOUNT_ARGS
+MOUNT_ARGS[root]="-o rw,relatime,nosuid,nodev,noexec,subvol=@"
+MOUNT_ARGS[var]="-o rw,relatime,nosuid,nodev,noexec,subvol=@var"
+MOUNT_ARGS[usr]="-o rw,relatime,nodev,subvol=@usr"
+MOUNT_ARGS[opt]="-o rw,relatime,nosuid,nodev,subvol=@opt"
+MOUNT_ARGS[home]="-o rw,relatime,nosuid,nodev,noexec,subvol=@home"
+MOUNT_ARGS[snapshots]="-o rw,relatime,nosuid,nodev,noexec,subvol=@snapshots"
 
 declare -A MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS
 MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[proc]="-o nosuid,nodev,noexec,hidepid=2,gid=proc -t proc proc"
@@ -53,9 +62,9 @@ MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[var/tmp]="-o rw,relatime,nodev,nosuid,noexec,si
 
 # Script
 
-# Ensure everything is umounted before starting.
-umount -R /mnt/
-swapoff --all
+# TODO: Ensure everything is umounted before starting.
+#umount -R /mnt/
+#swapoff --all
 [[ -b /dev/mapper/${LUKS_CONTAINER_LABEL} ]] && cryptsetup close ${LUKS_CONTAINER_LABEL}
 
 # Prepare the target drive
@@ -70,14 +79,35 @@ until cryptsetup open /dev/disk/by-partlabel/${ROOT_PART_NAME} ${LUKS_CONTAINER_
 mkfs.fat -F32 -n ${BOOT_PART_NAME} /dev/disk/by-partlabel/${BOOT_PART_NAME}
 mkfs.btrfs -f -L ${ROOT_PART_NAME} /dev/mapper/${LUKS_CONTAINER_LABEL} 
 
-# Mount and create BTRFS subvols
+# Mount the BTRFS raw partition as we need to create the subvolumes inside of it.
 mount /dev/mapper/${LUKS_CONTAINER_LABEL} /mnt
+
+# Create the subvolumes.
+for key in "${!MOUNT_ARGS[@]}"; do
+    if [[ $key != "root" ]]; then
+      btrfs subvolume create "/mnt/@${key}";
+    else
+      btrfs subvolume create "/mnt/@";
+    fi
+done
+
+# Unmount the raw BTRFS partition.
+umount -R /mnt
+
+# Mount the root subvolume.
+mount ${MOUNT_ARGS[root]} /dev/mapper/${LUKS_CONTAINER_LABEL} /mnt
+
+# Mount all the other subvolumes.
+for key in "${!MOUNT_ARGS[@]}"; do
+    if [[ $key != "root" ]]; then
+      mkdir -pv "/mnt/${key}";
+      mount ${MOUNT_ARGS[$key]} /dev/mapper/${LUKS_CONTAINER_LABEL} "/mnt/${key}";
+    fi
+done
+
+# Prepare the /efi/ dir and mount the FAT32 EFI partition into it.
 mkdir /mnt/efi
 mount /dev/disk/by-partlabel/${BOOT_PART_NAME} /mnt/efi
-for subvol in "${SUBVOLS[@]}"; do 
-    btrfs subvolume create "/mnt/$subvol";
-done
-# TODO: Further subvolume creation and mounting.
 
 # Mount pseudo filesystems.
 for key in "${!MOUNT_ARGS_FOR_PSEUDOFILESYSTEMS[@]}"; do
@@ -98,8 +128,8 @@ done
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED,NEW -j ACCEPT
 
-iptables -A INPUT  -i lo -s 127.0.0.1 -j ACCEPT
-iptables -A OUTPUT -o lo -d 127.0.0.1 -j ACCEPT
+iptables -A INPUT  -i lo -s 127.0.0.1 -d 127.0.0.1 -j ACCEPT
+iptables -A OUTPUT -o lo -s 127.0.0.1 -d 127.0.0.1 -j ACCEPT
 
 iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
 # iptables -A INPUT -p udp -m conntrack --ctstate NEW -j UDP
@@ -119,9 +149,10 @@ pacstrap -i /mnt ${PACSTRAP_PACKAGES} --ignore ${IGNORED_PKGS}
 # Set computer's hostname
 echo ${HOSTNAME} > /mnt/etc/hostname
 
-# pacman's aesthetics
+# pacman setup
 sed -i 's/#Color/Color/' /mnt/etc/pacman.conf
 sed -i 's/#TotalDownload/TotalDownload/' /mnt/etc/pacman.conf
+#echo "IgnorePkg = ${IGNORED_PKGS}" >> /mnt/etc/pacman.conf
 
 # Apply some network setup with iwd and iptables.
 iptables-save | tee /mnt/etc/iptables/ip{tables.rules,6tables.rules}
@@ -163,9 +194,9 @@ do
     echo "$item" >> /mnt/etc/sysctl.d/params.conf
 done
 
-# Apply dnscrypt-proxy settings and enable apparmor, iptables, iwd, dnscrypt-proxy.socket, systemd-homed, usbguard and fstrim.
+# Apply dnscrypt-proxy settings and enable apparmor, iptables, iwd, dnscrypt-proxy.socket and systemd-homed.
 patch /mnt/etc/dnscrypt-proxy/dnscrypt-proxy.toml patch_dnscryptproxy_toml.patch
-arch-chroot /mnt systemctl enable apparmor iptables iwd dnscrypt-proxy.socket systemd-homed usbguard fstrim
+arch-chroot /mnt systemctl enable apparmor iptables iwd dnscrypt-proxy.socket systemd-homed
 #arch-chroot /mnt timedatectl set-ntp true
 echo -en "nameserver 127.0.0.1\noptions edns0 single-request-reopen" > /mnt/etc/resolv.conf
 chattr +i /mnt/etc/resolv.conf
@@ -174,6 +205,7 @@ chattr +i /mnt/etc/resolv.conf
 arch-chroot /mnt sbctl create-keys
 echo -en 'uefi_secureboot_cert="/usr/share/secureboot/keys/db/db.pem"\nuefi_secureboot_key="/usr/share/secureboot/keys/db/db.key"' | tee /mnt/etc/dracut.conf.d/50-secure-boot.conf
 echo -en 'add_dracutmodules+=" tpm2-tss "' | tee /mnt/etc/dracut.conf.d/50-tpm2.conf
+echo -en 'add_dracutmodules+=" btrfs "' | tee /mnt/etc/dracut.conf.d/50-btrfs.conf
 echo -en 'use_fstab="yes"\nadd_fstab+=" /etc/fstab "' | tee /mnt/etc/dracut.conf.d/50-fstab.conf
 echo -en "reproducible=\"yes\"\nuefi=\"yes\"\nearly_microcode=\"yes\"\nkernel_cmdline=\"${KERNEL_BOOT_PARAMS}\"\nhostonly=\"yes\"\nhostonly_cmdline=\"no\"" | tee /mnt/etc/dracut.conf.d/50-host-only.conf
 
