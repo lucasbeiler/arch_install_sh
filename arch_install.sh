@@ -142,7 +142,7 @@ iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 until ping -c2 www.kernel.org; do echo 'Error pinging kernel.org. Are we connected to the Internet?'; done;
 sed -i '/http:\|rsync:\/\//d' /etc/pacman.d/mirrorlist # Remove non-https mirrors. I will not run reflector since archiso already does it.
 
-# System install
+# System install -- PREPARAÇÃO DA RAIZ COMEÇA AQUI -- BUSQUE POR "/MNT" PARA ENCONTRAR O RESTO.
 pacman -Syy
 pacstrap -i /mnt ${PACSTRAP_PACKAGES} --ignore ${IGNORED_PKGS}
 
