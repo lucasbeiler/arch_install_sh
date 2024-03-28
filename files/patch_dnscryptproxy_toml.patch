@@ -1,11 +1,11 @@
---- dnscrypt-proxy.toml.old	2021-12-19 12:07:35.372829559 -0300
-+++ /etc/dnscrypt-proxy/dnscrypt-proxy.toml	2021-12-19 12:09:48.942830001 -0300
+--- /etc/dnscrypt-proxy/dnscrypt-proxy.toml.orig	2023-02-14 15:58:13.000000000 -0300
++++ /etc/dnscrypt-proxy/dnscrypt-proxy.toml	2023-07-14 15:15:47.660280935 -0300
 @@ -29,7 +29,7 @@
  ##
  ## Remove the leading # first to enable this; lines starting with # are ignored.
  
 -# server_names = ['scaleway-fr', 'google', 'yandex', 'cloudflare']
-+server_names = ['adguard-dns', 'ahadns-doh-chi']
++server_names = ['quad9-doh-ip4-port443-filter-pri', 'cs-brazil', 'adguard-dns-doh']
  
  
  ## List of local addresses and ports to listen to. Can be IPv4 and/or IPv6.
@@ -18,6 +18,15 @@
  
  
  ## Maximum number of simultaneous client connections to accept
+@@ -61,7 +61,7 @@
+ ipv4_servers = true
+ 
+ # Use servers reachable over IPv6 -- Do not enable if you don't have IPv6 connectivity
+-ipv6_servers = false
++ipv6_servers = true
+ 
+ # Use servers implementing the DNSCrypt protocol
+ dnscrypt_servers = true
 @@ -76,7 +76,7 @@
  ## Require servers defined by remote sources to satisfy specific properties
  
@@ -27,7 +36,7 @@
  
  # Server must not log user queries (declarative)
  require_nolog = true
-@@ -115,7 +115,7 @@
+@@ -122,7 +122,7 @@
  ## increase this. Startup may be slower if you do so.
  ## Don't increase it too much. 10000 is the highest reasonable value.
  
@@ -35,8 +44,8 @@
 +timeout = 1000
  
  
- ## Keepalive for HTTP (HTTPS, HTTP/2) queries, in seconds
-@@ -136,7 +136,7 @@
+ ## Keepalive for HTTP (HTTPS, HTTP/2, HTTP/3) queries, in seconds
+@@ -143,7 +143,7 @@
  ## Using the `hinfo` option means that some responses will be lies.
  ## Unfortunately, the `hinfo` option appears to be required for Android 8+
  
@@ -45,7 +54,7 @@
  
  
  ## Load-balancing strategy: 'p2' (default), 'ph', 'p<n>', 'first' or 'random'
-@@ -185,7 +185,7 @@
+@@ -199,7 +199,7 @@
  ## This may improve privacy but can also have a significant impact on CPU usage
  ## Only enable if you don't have a lot of network load
  
@@ -54,21 +63,12 @@
  
  
  ## DoH: Disable TLS session tickets - increases privacy but also latency
-@@ -314,7 +314,7 @@
- ## This makes things faster when there is no IPv6 connectivity, but can
- ## also cause reliability issues with some stub resolvers.
+@@ -816,7 +816,7 @@
  
--block_ipv6 = false
-+block_ipv6 = true
- 
- 
- ## Immediately respond to A and AAAA queries for host names without a domain name
-@@ -800,7 +800,7 @@
- 
- # Skip resolvers incompatible with anonymization instead of using them directly
+ ## Skip resolvers incompatible with anonymization instead of using them directly
  
 -skip_incompatible = false
 +skip_incompatible = true
  
  
- # If public server certificates for a non-conformant server cannot be
+ ## If public server certificates for a non-conformant server cannot be

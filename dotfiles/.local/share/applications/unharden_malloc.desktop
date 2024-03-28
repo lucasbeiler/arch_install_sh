@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=unharden_malloc chromium "https://web.telegram.org/k/"
+Name=unharden_malloc chromium "https://web.telegram.org/k/"
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

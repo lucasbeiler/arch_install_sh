@@ -1,0 +1,12 @@
+[Unit]
+Description=Deny new USB some time after each boot.
+
+[Service]
+Type=simple
+RemainAfterExit=no
+ExecStartPre=/bin/sleep 55
+ExecStart=sysctl -w kernel.deny_new_usb=1
+TimeoutStartSec=60
+
+[Install]
+WantedBy=default.target

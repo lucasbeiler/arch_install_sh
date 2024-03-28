@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=unharden_malloc alacritty -e ncspot
+Name=unharden_malloc alacritty -e ncspot
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

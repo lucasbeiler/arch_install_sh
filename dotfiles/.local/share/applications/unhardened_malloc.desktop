@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=unhardened_malloc chromium
+Name=unhardened_malloc chromium
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true
