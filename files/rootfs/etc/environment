@@ -1,0 +1,44 @@
+#
+# This file is parsed by pam_env module
+#
+# Syntax: simple "KEY=VAL" pairs on separate lines
+#
+
+# General wayland environment variables
+XDG_SESSION_TYPE=wayland
+QT_QPA_PLATFORM=wayland
+GDK_BACKEND=wayland
+SDL_VIDEODRIVER=wayland
+_JAVA_AWT_WM_NONREPARENTING=1
+QT_QPA_PLATFORM=wayland
+MOZ_ENABLE_WAYLAND=1
+
+# GPU setup - Intel
+VDPAU_DRIVER=va_gl
+LIBVA_DRIVER_NAME=iHD
+#export VK_ICD_FILENAMES
+#LIBGL_DRI3_DISABLE=1
+#LIBVA_DRI3_DISABLE=1
+#MESA_GLSL_CACHE_DISABLE=true
+#MESA_SHADER_CACHE_DISABLE=true
+
+# wlroots misc
+#WLR_NO_HARDWARE_CURSORS=1
+#WLR_RENDERER=vulkan
+#__GL_GSYNC_ALLOWED=0
+#__GL_VRR_ALLOWED=0
+# XWAYLAND_NO_GLAMOR=1
+
+# GPU setup - NVIDIA
+#__NV_PRIME_RENDER_OFFLOAD=1
+#__NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+#__GLX_VENDOR_LIBRARY_NAME=nvidia
+#DRI_PRIME=1
+#__VK_LAYER_NV_optimus=NVIDIA_only
+#GBM_BACKEND=nvidia-drm
+#VDPAU_DRIVER=nvidia
+#LIBVA_DRIVER_NAME=nvidia
+#VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
+
+VAGRANT_DEFAULT_PROVIDER=libvirt
+GLIBC_TUNABLES=glibc.cpu.x86_shstk=on:glibc.cpu.x86_ibt=on
