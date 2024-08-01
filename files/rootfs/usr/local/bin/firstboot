@@ -49,6 +49,7 @@ $PRIVESC_PREFIX tpm2_dictionarylockout -s -n 4 -t 86400 -l 86400 # Only a few fa
 echo "Verifying TPM2 and Secure Boot enrollment statuses..."
 if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Disabled" ] && [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
      if ! $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks | grep -qi tpm2; then
+        $PRIVESC_PREFIX clevis luks bind -d /dev/gpt-auto-root-luks sss 't:2,"pins":"tang":[url":http://tang1.srv"tpm2], "tpm2": {"pcr_ids":"0,1,5,7"}}}'
 	    $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --recovery-key
         $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=tpm2 --tpm2-device=auto --tpm2-with-pin=yes --tpm2-pcrs=0+1+5+7  # These hash-based PCRs will render the system unbootable if: Hardware, UEFI firmware or Secure Boot status and keys are tampered. TODO: Consider PCR 14.
         $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password # Remove any LUKS password, as the only password is now inside the TPM chip and protected by those PCRs.
