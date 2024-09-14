@@ -1,0 +1,93 @@
+#!/bin/bash
+USERNAMES=('noone' 'lucas' 'work')
+declare -A USER_GROUPS
+USER_GROUPS[${USERNAMES[0]}]="wheel,libvirt,docker,video,audio,users,power,network"
+USER_GROUPS[${USERNAMES[1]}]="libvirt,docker,video,audio,users,power,network"
+USER_GROUPS[${USERNAMES[2]}]="libvirt,docker,video,audio,users,power,network"
+
+set -euo pipefail
+reboot () { echo 'Reboot now? (y/N)' && read x && [[ "$x" == "y" ]] && /sbin/reboot; }
+reboot_firm () { echo 'Reboot now? (y/N)' && read x && [[ "$x" == "y" ]] && /usr/bin/systemctl reboot --firmware-setup; }
+
+PRIVESC_PREFIX="/usr/bin/sudo" # In my system it is a symlink to /usr/bin/doas.
+if [ "$(id -u)" -eq 0 ]; then
+    PRIVESC_PREFIX="" # doas refuses to be called by the root user.
+fi
+
+$PRIVESC_PREFIX chattr +C /home/
+# Create encrypted-home users.
+echo "Creating users..."
+for USERNAME in "${USERNAMES[@]}"; do
+    if ! id -u $USERNAME > /dev/null 2>&1; then
+        until $PRIVESC_PREFIX homectl create $USERNAME --storage luks --fs-type btrfs --member-of=${USER_GROUPS[$USERNAME]} --nosuid=true --luks-discard=true --nodev=true; do echo 'Tente novamente!'; done;
+    else
+        echo "User ${USERNAME} already exists. Ignoring."
+    fi
+done
+echo
+
+# Enroll Secure Boot keys and reboot.
+echo "Checking Secure Boot key enrollment status..."
+if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+    $PRIVESC_PREFIX sbctl enroll-keys
+    $PRIVESC_PREFIX reboot_firm
+elif [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+    echo "Good. Booted with Secure Boot and with its Setup Mode already disabled."
+    echo "Therefore the appropriate keys are supposed to be already enrolled. Bye."
+fi
+
+# Disable direct access to the root user as we don't need it anymore.
+# Do you want to run things as root? Use sudo (but I recommend doas instead of sudo) from your wheel group users.
+if ! $PRIVESC_PREFIX cat /etc/shadow | grep -iq 'root:!'; then
+    echo "Locking the root user..."
+    $PRIVESC_PREFIX passwd -l root
+fi
+
+$PRIVESC_PREFIX tpm2_dictionarylockout -s -n 4 -t 86400 -l 86400 # Only a few failed TPM PIN attempts allowed each day. 
+
+# Enroll TPM2 keys.
+echo "Verifying TPM2 and Secure Boot enrollment statuses..."
+if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Disabled" ] && [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+     if ! $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks | grep -qi tpm2; then
+	    $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --recovery-key
+        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=tpm2 --tpm2-device=auto --tpm2-with-pin=yes --tpm2-pcrs=0+1+2+3+5+7  # These hash-based PCRs will render the system unbootable if: Hardware, UEFI firmware or Secure Boot status and keys are tampered. TODO: Consider PCR 14.
+        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password # Remove any LUKS password, as the only password is now inside the TPM chip and protected by those PCRs.
+        $PRIVESC_PREFIX reboot
+    else
+        echo "LUKS TPM slot is already set up."
+    fi
+else
+    echo "ERROR: Not sealing the keys against TPM2 PCRs because Secure Boot isn't properly set up yet."
+fi
+
+# I don't like to run makepkg and yay as root.
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Do not run this part of the script as root."
+    exit 1
+fi
+
+# Install yay.
+if [ ! $(command -v yay) ]; then
+    rm -rf ~/yay
+    git clone https://aur.archlinux.org/yay.git ~/yay
+    cd ~/yay && makepkg -si
+else
+    echo "yay is already installed!"
+fi
+
+# Install some of the AUR packages that I need.
+yay -Sy --needed hardened-malloc-git
+
+if [ -f "/usr/lib/libhardened_malloc.so" ]; then
+  echo "/usr/lib/libhardened_malloc.so" | $PRIVESC_PREFIX tee /etc/ld.so.preload
+fi
+
+yay -Sy --needed dracut-hook-uefi 
+
+# Run this as the user that you want to apply the dotfiles.
+if [ ! -d "$HOME/dotfiles" ]; then
+    cp -r /etc/arch_install_sh/dotfiles ~/dotfiles || echo 'ERROR!'
+    cp -r ~/dotfiles/.{config,local,*rc} ~/ || echo 'ERROR!'
+fi
+
+echo "DONE! YOUR ARCH LINUX SETUP IS DONE!"
