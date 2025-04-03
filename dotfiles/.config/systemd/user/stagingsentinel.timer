@@ -1,0 +1,11 @@
+[Unit]
+Description=Run my script every 2 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=3min
+Unit=stagingsentinel.service
+
+[Install]
+WantedBy=timers.target
+
