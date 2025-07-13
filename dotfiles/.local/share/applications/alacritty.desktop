@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=alacritty -e ncspot
+Name=alacritty -e ncspot
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true
