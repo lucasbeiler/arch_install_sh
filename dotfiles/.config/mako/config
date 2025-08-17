@@ -1,0 +1,13 @@
+format=<b>%a </b> %s\n%b
+anchor=bottom-right
+icons=0
+default-timeout=15000
+ignore-timeout=1
+layer=overlay
+border-size=2
+border-color=#28282B
+border-radius=15
+background-color=#28282B
+width=300
+height=110
+margin=5

@@ -1,0 +1,6 @@
+[Unit]
+Description=Run my script every 2 minutes
+
+[Service]
+ExecStart=/home/work/staging_sentinel.sh
+

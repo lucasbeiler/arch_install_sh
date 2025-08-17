@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=allow_new_usb_tmp
+Name=allow_new_usb_tmp
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

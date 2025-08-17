@@ -1,0 +1,13 @@
+[Unit]
+Description=Run my service daily at 11:01 AM and 10:01 AM, and every 15 minutes
+
+[Timer]
+OnCalendar=*-*-* 10:01:00
+OnCalendar=*-*-* 11:01:00
+OnCalendar=*-*-* 12:01:00
+OnCalendar=*-*-* 13:01:00
+Persistent=true
+Unit=gtavibot.service
+
+[Install]
+WantedBy=timers.target

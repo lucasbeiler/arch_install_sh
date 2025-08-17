@@ -1,0 +1,6 @@
+# Static table lookup for hostnames.
+# See hosts(5) for details.
+127.0.0.1        localhost
+::1              localhost
+200.169.52.100 cwp.univali.br
+172.31.98.1 captiveportal-login.univali.br

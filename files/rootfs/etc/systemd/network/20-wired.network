@@ -1,0 +1,10 @@
+[Match]
+Type=ether
+Kind=!*
+
+[Network]
+DHCP=yes
+IPv6PrivacyExtensions=kernel
+
+[DHCPv4]
+RouteMetric=10

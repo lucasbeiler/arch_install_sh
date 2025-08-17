@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=chromium --app="https://www.deezer.com/br/loved/"
+Name=chromium --app="https://www.deezer.com/br/loved/"
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

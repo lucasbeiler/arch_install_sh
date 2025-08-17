@@ -1,0 +1,74 @@
+#!/bin/bash
+USERNAMES=('noone' 'lucas' 'work')
+declare -A USER_GROUPS
+USER_GROUPS[${USERNAMES[0]}]="wheel,libvirt,docker,video,audio,users,power,network"
+USER_GROUPS[${USERNAMES[1]}]="libvirt,docker,video,audio,users,power,network"
+USER_GROUPS[${USERNAMES[2]}]="libvirt,docker,video,audio,users,power,network"
+declare -A USER_HOME_SIZES
+USER_HOME_SIZES[${USERNAMES[0]}]="15G"
+USER_HOME_SIZES[${USERNAMES[1]}]="70G"
+USER_HOME_SIZES[${USERNAMES[2]}]="120G"
+
+set -euo pipefail
+reboot () { echo 'Reboot now? (y/N)' && read x && [[ "$x" == "y" ]] && /sbin/reboot; }
+reboot_firm () { echo 'Reboot now? (y/N)' && read x && [[ "$x" == "y" ]] && /usr/bin/systemctl reboot --firmware-setup; }
+
+PRIVESC_PREFIX="/usr/bin/sudo" # In my system it is a symlink to /usr/bin/doas.
+if [ "$(id -u)" -eq 0 ]; then
+    PRIVESC_PREFIX="" # doas refuses to be called by the root user.
+fi
+
+$PRIVESC_PREFIX chattr +C /home/
+# Create encrypted-home users.
+echo "Creating users..."
+for USERNAME in "${USERNAMES[@]}"; do
+    if ! id -u $USERNAME > /dev/null 2>&1; then
+        # TODO: BTRFS had some issues without --luks-discard=true, so home directories will be using ext4 for a while...
+        until $PRIVESC_PREFIX homectl create $USERNAME --storage luks --fs-type ext4 --disk-size ${USER_HOME_SIZES[$USERNAME]} --member-of=${USER_GROUPS[$USERNAME]} --nosuid=true --noexec=true --nodev=true; do echo 'Tente novamente!'; done;
+    else
+        echo "User ${USERNAME} already exists. Ignoring."
+    fi
+done
+echo
+
+# Enroll Secure Boot keys and reboot.
+echo "Checking Secure Boot key enrollment status..."
+if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+    $PRIVESC_PREFIX bootctl update
+    $PRIVESC_PREFIX sbctl enroll-keys
+    $PRIVESC_PREFIX reboot_firm
+elif [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+    echo "Good. Booted with Secure Boot and with its Setup Mode already disabled."
+    echo "Therefore the appropriate keys are supposed to be already enrolled. Bye."
+fi
+
+# Disable direct access to the root user as we don't need it anymore.
+# Do you want to run things as root? Use sudo (but I recommend doas instead of sudo) from your wheel group users.
+if ! $PRIVESC_PREFIX cat /etc/shadow | grep -iq 'root:!'; then
+    echo "Locking the root user..."
+    $PRIVESC_PREFIX passwd -l root
+fi
+
+# Enroll TPM2 keys.
+echo "Verifying TPM2 and Secure Boot enrollment statuses..."
+if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Disabled" ] && [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
+     if ! $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks | grep -qi tpm2; then
+        $PRIVESC_PREFIX tpm2_dictionarylockout -s -n 4 -t 86400 -l 86400 # Only a few failed TPM PIN attempts allowed each day. 
+	    $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --recovery-key
+        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=tpm2 --tpm2-device=auto --tpm2-with-pin=yes --tpm2-pcrs=0+1+2+3+4+5+7  # These hash-based PCRs will render the system unbootable if: Hardware, UEFI firmware or Secure Boot status and keys are tampered.
+        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password # Remove any LUKS password, as the only password is now inside the TPM chip and protected by those PCRs.
+        $PRIVESC_PREFIX reboot
+    else
+        echo "LUKS TPM slot is already set up."
+    fi
+else
+    echo "ERROR: Not sealing the keys against TPM2 PCRs because Secure Boot isn't properly set up yet."
+fi
+
+git clone https://github.com/GrapheneOS/hardened_malloc ~/hmalloc
+cd ~/hmalloc
+make
+$PRIVESC_PREFIX mv out/libhardened_malloc.so /usr/local/lib/
+$PRIVESC_PREFIX chmod 755 /usr/local/lib/libhardened_malloc.so
+echo "/usr/local/lib/libhardened_malloc.so" | $PRIVESC_PREFIX tee /mnt/etc/ld.so.preload
+cd -
