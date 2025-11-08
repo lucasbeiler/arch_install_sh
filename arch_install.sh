@@ -102,11 +102,11 @@ until arch-chroot /mnt passwd; do echo 'Try again!'; done;
 
 # Setup dnscrypt-proxy.
 echo -en "nameserver 127.0.0.1\noptions edns0 single-request-reopen" > /mnt/etc/resolv.conf
-arch-chroot /mnt patch /etc/dnscrypt-proxy/dnscrypt-proxy.toml /etc/arch_install_sh/patch_dnscryptproxy_toml.patch
 
 # Close things up.
 chmod +x /mnt/usr/local/bin/firstboot
 mkdir -pv /mnt/etc/arch_install_sh && cp -r ./ /mnt/etc/arch_install_sh/
+arch-chroot /mnt patch /etc/dnscrypt-proxy/dnscrypt-proxy.toml /etc/arch_install_sh/patch_dnscryptproxy_toml.patch
 echo "[+] Bye! Run firstboot as soon as you boot into the installed system for the first time."
 umount -R /mnt
 [[ -b /dev/mapper/${LUKS_CONTAINER_LABEL} ]] && cryptsetup close ${LUKS_CONTAINER_LABEL}

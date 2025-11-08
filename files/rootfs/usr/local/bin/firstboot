@@ -34,7 +34,8 @@ echo
 # Enroll Secure Boot keys and reboot.
 echo "Checking Secure Boot key enrollment status..."
 if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
-    $PRIVESC_PREFIX bootctl update
+    $PRIVESC_PREFIX bootctl install || :
+    $PRIVESC_PREFIX bootctl update || :
     $PRIVESC_PREFIX sbctl enroll-keys
     $PRIVESC_PREFIX reboot_firm
 elif [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
