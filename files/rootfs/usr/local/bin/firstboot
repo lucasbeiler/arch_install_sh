@@ -55,8 +55,13 @@ echo "Verifying TPM2 and Secure Boot enrollment statuses..."
 if [ $(sbctl status | grep "^Setup Mode" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Disabled" ] && [ $(sbctl status | grep "^Secure Boot" | awk 'NF>1{print $NF}' | sed -e 's/^[[:space:]]*//') = "Enabled" ]; then
      if ! $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks | grep -qi tpm2; then
         $PRIVESC_PREFIX tpm2_dictionarylockout -s -n 4 -t 86400 -l 86400 # Only a few failed TPM PIN attempts allowed each day. 
+        $PRIVESC_PREFIX mkdir -p /etc/tpm-lockout-key.d
+        $PRIVESC_PREFIX openssl rand 128 | tr -dc 'A-Za-z0-9-_.:@()+' | $PRIVESC_PREFIX tee /etc/tpm-lockout-key.d/tpm.key
+        $PRIVESC_PREFIX tpm2_changeauth -c lockout file:/etc/tpm-lockout-key.d/tpm.key # Lock TPM lockout config behind that huge keyfile.
+        $PRIVESC_PREFIX mv /etc/tpm-lockout-key.d/tpm.key /etc/tpm-lockout-key.d/tpm.key.bkp # Now that it is successfully set, move it to a definitive path.
+        $PRIVESC_PREFIX chmod 600 /etc/tpm-lockout-key.d/tpm.key.bkp # Make it readable only by root.
 	    $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --recovery-key
-        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=tpm2 --tpm2-device=auto --tpm2-with-pin=yes --tpm2-pcrs=0+1+2+3+4+5+7  # These hash-based PCRs will render the system unbootable if: Hardware, UEFI firmware or Secure Boot status and keys are tampered.
+        $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=tpm2 --tpm2-device=auto --tpm2-with-pin=yes --tpm2-pcrs=0+1+2+3+5+7  # These hash-based PCRs will render the system unbootable if: Hardware, UEFI firmware or Secure Boot status and keys are tampered.
         $PRIVESC_PREFIX systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password # Remove any LUKS password, as the only password is now inside the TPM chip and protected by those PCRs.
         $PRIVESC_PREFIX reboot
     else
