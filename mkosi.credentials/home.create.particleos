@@ -1,0 +1,17 @@
+{
+    "userName": "hrdnos",
+    "uid": 1000,
+    "gid": 1000,
+    "disposition": "regular",
+    "enforcePasswordPolicy": false,
+    "memberOf": [
+        "wheel",
+        "systemd-journal"
+    ],
+    "secret": {
+        "password": ["hrdnos"]
+    },
+    "privileged": {
+        "hashedPassword": ["$1$idWouTQ8$ez22l/yqjROCxwZ27R1kO."]
+    }
+}

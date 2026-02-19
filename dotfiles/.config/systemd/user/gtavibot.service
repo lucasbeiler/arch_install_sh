@@ -1,9 +1,0 @@
-[Unit]
-Description=Trailer 2 awaiting-bot
-
-[Service]
-ExecStart=python /home/work/bot/bot.py
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
