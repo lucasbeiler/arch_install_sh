@@ -1,0 +1,19 @@
+#!/sbin/openrc-run
+
+name="populate-var-etc"
+description="Prepare things"
+
+command="/usr/local/bin/populate-var-etc"
+command_background=false
+
+start_pre() {
+    if [ ! -f /usr/local/bin/populate-var-etc ]; then
+        return 1
+    fi
+}
+
+start() {
+    ebegin "Running..."
+    $command
+    eend $?
+}

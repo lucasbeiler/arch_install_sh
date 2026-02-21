@@ -1,0 +1,27 @@
+#!/bin/sh
+set -euo pipefail
+
+# Variables.
+ETC_DIR="/data/etc"
+HOME_DIR="/data/home"
+SHOULD_REBOOT=no
+
+# Create directories.
+mkdir -p $ETC_DIR $HOME_DIR
+
+for user in $(grep 'sh$' /etc/passwd | grep -v '^root:' | cut -d: -f1); do mkdir -p $HOME_DIR/$user; done;
+
+for file in /etc/*.bkp; do
+  [ -e "$file" ] || break  
+  file_basename=$(echo "$file" | sed -e 's|^/etc/||' -e 's|\.bkp$||')  
+  target="$ETC_DIR/$file_basename"  
+  if [ ! -f "$target" ]; then
+    cp "$file" "$target"
+    echo "Created $target from $file"
+    SHOULD_REBOOT=yes
+  fi
+done
+
+if [[ "$SHOULD_REBOOT" != "no" ]]; then
+  reboot
+fi

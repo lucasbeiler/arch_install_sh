@@ -1,0 +1,5 @@
+rootfs/
+rootfs.squashfs*
+*.img
+*.squashfs
+OVMF_*

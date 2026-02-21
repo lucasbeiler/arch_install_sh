@@ -1,0 +1,13 @@
+# General wayland environment variables
+XDG_SESSION_TYPE=wayland
+QT_QPA_PLATFORM=wayland
+GDK_BACKEND=wayland
+SDL_VIDEODRIVER=wayland
+_JAVA_AWT_WM_NONREPARENTING=1
+QT_QPA_PLATFORM=wayland
+
+# GPU setup - Intel
+VDPAU_DRIVER=va_gl
+LIBVA_DRIVER_NAME=iHD
+
+#LD_PRELOAD="/usr/lib/libhardened_malloc.so"
