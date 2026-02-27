@@ -10,15 +10,22 @@
 
 # Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
 
+systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river
+systemctl --user restart xdg-desktop-portal
+
 riverctl spawn "kanshi"
 riverctl spawn "LC_ALL="en_US.UTF-8" waybar"
 
-riverctl input pointer-1267-12368-ELAN0B00:00_04F3:3050_Touchpad tap enabled
+riverctl input $(riverctl list-inputs | grep -i touchpad) tap enabled
 riverctl focus-follows-cursor normal
 
 riverctl map normal Super+Shift C spawn "chromium --start-maximized"
 riverctl map normal Super+Shift T spawn "chromium --start-maximized "https://web.telegram.org""
 riverctl map normal Super+Shift M spawn "alacritty -e ncspot"
+
+riverctl map normal Super E zoom
+riverctl map normal Super Tab focus-previous-tags  
 
 # Super+Shift+Return to start an instance of alacritty
 riverctl map normal Super Return spawn alacritty
@@ -46,8 +53,7 @@ riverctl map normal Super Comma focus-output previous
 riverctl map normal Super+Shift Period send-to-output next
 riverctl map normal Super+Shift Comma send-to-output previous
 
-# Super+Return to bump the focused view to the top of the layout stack
-#riverctl map normal Super Return zoom
+riverctl map normal Super W toggle-fullscreen
 
 # Super+H and Super+L to decrease/increase the main ratio of rivertile(1)
 riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
@@ -137,8 +143,8 @@ do
     riverctl map $mode None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
-    riverctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
-    riverctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
+    riverctl map $mode None XF86AudioRaiseVolume  spawn 'pactl set-sink-volume @DEFAULT_SINK@ +5%'
+    riverctl map $mode None XF86AudioLowerVolume  spawn 'pactl set-sink-volume @DEFAULT_SINK@ -5%'
     riverctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)

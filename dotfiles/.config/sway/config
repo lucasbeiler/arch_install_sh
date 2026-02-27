@@ -6,8 +6,8 @@ set $right k
 xwayland disable
 set $term alacritty
 set $menu wofi
-
-    default_border none
+font pango:JetBrainsMono Nerd Font 11
+default_border none
     default_floating_border none
     for_window [class="^.*"] border pixel 1
     titlebar_border_thickness 0                                                     
@@ -17,8 +17,10 @@ set $menu wofi
     # Start a terminal
     bindsym $mod+Return exec $term
     bindsym $mod+Shift+c exec chromium --start-maximized  
-    bindsym $mod+Shift+t exec chromium --start-maximized "https://web.telegram.org/k/"
+    bindsym $mod+Shift+t exec chromium --start-maximized --app "https://web.telegram.org/k/"
+    bindsym $mod+Shift+i exec chromium --start-maximized --incognito
     bindsym $mod+Shift+m exec alacritty -e ncspot
+    bindsym $mod+Shift+g exec alacritty -e gurk
     bindsym $mod+Shift+a exec ~/.config/sway/lock.sh
     bindsym $mod+Shift+u exec allow_new_usb_tmp
     

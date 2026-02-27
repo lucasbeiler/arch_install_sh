@@ -36,15 +36,15 @@ unfocused_hollow = false
 size = 12
 
 [font.bold]
-family = "Fantasque Sans Mono"
+family = "Iosevka Nerd Font"
 style = "Bold"
 
 [font.italic]
-family = "Fantasque Sans Mono"
+family = "Iosevka Nerd Font"
 style = "Italic"
 
 [font.normal]
-family = "Fantasque Sans Mono"
+family = "Iosevka Nerd Font"
 style = "Regular"
 
 [[keyboard.bindings]]
@@ -63,7 +63,7 @@ key = "Minus"
 mods = "Control"
 
 [window]
-opacity = 0.95
+opacity = 1
 
 [window.padding]
 #decorations = "none"

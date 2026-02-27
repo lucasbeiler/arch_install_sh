@@ -1,17 +1,17 @@
 {
     "layer": "bottom", // Waybar at top layer
-    "position": "bottom", // Waybar position (top|bottom|left|right)
-    "height": 15, // Waybar height (to be removed for auto height)
+    "position": "top", // Waybar position (top|bottom|left|right)
     "spacing": 2, // Gaps between modules (4px)
-    "modules-left": ["sway/workspaces"],
+    "modules-left": ["river/tags"],
     "modules-center": ["clock"],
 //    "modules-right": ["pulseaudio", "network", "backlight",
 //                      "battery", "cpu","memory", "temperature", "clock",
 //                      "tray"],
     "modules-right": [ "tray", "network", "pulseaudio", "battery"],
 
-    "river/workspaces": {
-      "num-tags": 9
+    "river/tags": {
+      "num-tags": 9,
+      "hide-vacant": true
     },
 
     "idle_inhibitor": {
@@ -29,7 +29,8 @@
         "actions": {"on-click-right": "mode", "on-scroll-up": "shift_down", "on-scroll-down": "shift_up"},
         "tooltip-format": 
             "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        "format": "{:%Y-%m-%d %H:%M:%S}",
+        "interval": 1
     },
 //    "cpu": {
 //        "format": "{usage}% ",
@@ -66,7 +67,7 @@
         "format-icons": [" ", " ", " ", " ", " "]
     },
     "network": {
-        "format-wifi": "{essid} ({signalStrength}%)  ",
+        "format-wifi": "{ipaddr}/{cidr} ({signalStrength}%)  ",
         "format-ethernet": "{ipaddr}/{cidr} ",
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": "{ifname} (No IP) ",
